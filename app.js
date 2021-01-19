@@ -5,6 +5,7 @@ const cookieParser = require('cookie-parser');
 const session = require('express-session');
 const nunjucks = require('nunjucks');
 const dotenv = require('dotenv');
+const firebase = require('./firebaseInitializer');
 
 dotenv.config();
 const webSocket = require('./socket');
