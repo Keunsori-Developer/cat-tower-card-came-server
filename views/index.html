@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TEST SOCKET EVENT</title>
+</head>
+<body>
+    <h1>TEST SOCKET EVENT</h1>
+    <form id="form-start">
+        <h2>test start </h2>
+        <div class="form-group">
+            <label for="msgForm">roomId, round, user </label>
+            <input type="text" class="form-control" id="roomId" placeholder="roomId">
+            <input type="text" class="form-control" id="round" placeholder="round">
+            <input type="text" class="form-control" id="user" placeholder="user" value="{ mid: ,nickname: }">
+        </div>
+        <button type="submit" class="btn btn-primary">Send</button>
+    </form>
+
+    <form id="form-throw">
+        <h2>test throw </h2>
+        <div class="form-group">
+            <label for="msgForm">user, card </label>
+            <input type="text" class="form-control" id="user" placeholder="user" value="{ mid: ,nickname: }">
+            <input type="text" class="form-control" id="card" placeholder="card" value="{ breed: ,index: }">
+        </div>
+        <button type="submit" class="btn btn-primary">Send</button>
+    </form>
+
+    <form id="form-giveup">
+        <h2>test giveup </h2>
+        <div class="form-group">
+            <label for="msgForm">user </label>
+            <input type="text" class="form-control" id="user" placeholder="user" value="{ mid: ,nickname: }">
+        </div>
+        <button type="submit" class="btn btn-primary">Send</button>
+    </form>
+
+    <form id="form-finish">
+        <h2>test finish </h2>
+        <div class="form-group">
+            <label for="msgForm">roomId, user, round, leftCard </label>
+            <input type="text" class="form-control" id="roomId" placeholder="roomId">
+            <input type="text" class="form-control" id="user" placeholder="user" value="{ mid: ,nickname: }">
+            <input type="text" class="form-control" id="round" placeholder="round">
+            <input type="text" class="form-control" id="leftCard" placeholder="leftCard ">
+        </div>
+        <button type="submit" class="btn btn-primary">Send</button>
+    </form>
+
+
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+    <script src = "/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io.connect('http://localhost:8005/ingame',{
+            path: '/socket.io',
+            transports: ['websocket'],
+        });
+        // socket.on('news', function (data) {
+        //     console.log(data);
+        //     socket.emit('reply', 'Hello Node.JS');
+        // });
+
+
+        socket.on('cardgive', function (data) {
+            console.log(data);
+        });
+        socket.on('playerorder', function (data) {
+            console.log(data);
+        });
+        socket.on('status', function (data) {
+            console.log(data);
+        });
+        socket.on('sequence', function (data) {
+            console.log(data);
+        });
+        socket.on('result', function (data) {
+            console.log(data);
+        });
+
+
+        $("#form-start").submit( (e) => {
+            e.preventDefault();
+            let $roomId = $("#roomId");
+            let $round = $("#round");
+            let $user = $("#user");
+
+            socket.emit('start', 
+                { 
+                    roomId : $roomId.val(),
+                    round : $round.val(),
+                    user : $user.val()
+                }
+            );
+            $roomId.val("");
+            $round.val("");
+            $user.val("")
+        });
+
+        $("#form-throw").submit( (e) => {
+            e.preventDefault();
+            let $user = $("#user");
+            let $card = $("#card");
+
+
+            socket.emit('throw', 
+                { 
+                    user : $user.val(),
+                    card : $card.val(),
+                }
+            );
+        });
+
+        $("#form-giveup").submit( (e) => {
+            e.preventDefault();
+            let $user = $("#user");
+
+            socket.emit('giveup', 
+                { 
+                    user : $user.val()
+                }
+            );
+        });
+
+        $("#form-finish").submit( (e) => {
+            e.preventDefault();
+            let $roomId = $("#roomId");
+            let $user = $("#user");
+            let $round = $("#round");
+            let $leftCard = $("#leftCard");
+
+
+            socket.emit('finish', 
+                { 
+                    roomId : $roomId.val(),
+                    user : $user .val(),
+                    round : $round .val(),
+                    leftCard : $leftCard.val(),
+                }
+            );
+        });
+
+    </script>
+</body>
+</html>
