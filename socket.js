@@ -1,6 +1,106 @@
 const SocketIO = require('socket.io');
+const express = require('express');
+const path = require('path');
+const morgan = require('morgan');
+const cookieParser = require('cookie-parser');
+const session = require('express-session');
+const nunjucks = require('nunjucks');
 
-module.exports = (server, app) => {
+const indexRouter = require('./routes');
+const firebase_db = require('./firebaseInitializer.js');
+
+
+//리팩토링은 나중에
+
+// function writeUserData(userId, name, email, imageUrl) { //write
+//     firebase.database().ref('users/' + userId).set({
+//       username: name,
+//       email: email,
+//       profile_picture : imageUrl
+//     });
+//   }
+
+
+//   function writeNewPost(uid, username, picture, title, body) {
+//     // A post entry.
+//     var postData = {
+//       author: username,
+//       uid: uid,
+//       body: body,
+//       title: title,
+//       starCount: 0,
+//       authorPic: picture
+//     };
+  
+//     // Get a key for a new Post.
+//     var newPostKey = firebase.database().ref().child('posts').push().key;
+  
+//     // Write the new post's data simultaneously in the posts list and the user's post list.
+//     var updates = {};
+//     updates['/posts/' + newPostKey] = postData;
+//     updates['/user-posts/' + uid + '/' + newPostKey] = postData;
+  
+//     return firebase.database().ref().update(updates);
+//   }
+
+
+//   firebase.database().ref('users/' + userId).set({
+//     username: name,
+//     email: email,
+//     profile_picture : imageUrl
+//   }, (error) => {
+//     if (error) {
+//       // The write failed...
+//     } else {
+//       // Data saved successfully!
+//     }
+//   });
+
+
+
+
+
+
+
+
+
+
+
+module.exports = () => {
+
+    const app = express();
+    app.set('port',  process.env.PORT || 8005);
+    app.set('view engine', 'html');
+    nunjucks.configure('views', {
+        express: app,
+        watch: true,
+    });
+    
+    app.use(morgan('dev'));
+    app.use(express.static(path.join(__dirname, 'public')));
+    app.use(express.json());
+    app.use(express.urlencoded({ extended: false}));
+    
+    
+    app.use('/', indexRouter);
+    
+    app.use((req, res, next) => {
+        const error = new Error(`${req.method} ${req.url} 라우터가 없습니다.`);
+        error.status = 404;
+        next(error);
+    });
+    
+    app.use((err, req, res, next) => {
+        res.locals.message = err.message;
+        res.locals.error =  process.env.NODE_ENV !== 'production' ? err : {};
+        res.status(err.status || 500);
+        res.render('error');
+    });
+    
+    const server = app.listen(app.get('port'), () => {
+        console.log(app.get('port'),'번 포트에서 대기중');
+    });
+    
     const io = SocketIO(server, { path: '/socket.io'});
     app.set('io',io);
     const ingame = io.of('/ingame');

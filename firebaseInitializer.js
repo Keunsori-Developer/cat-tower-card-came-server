@@ -1,7 +1,7 @@
-var firebase = require('firebase/app');
+let firebase = require('firebase/app');
 require("firebase/database");
 
-var firebaseConfig = {
+let firebaseConfig = {
     apiKey: "AIzaSyBnF9EBYncAtO5QX79SkS6ceYoOR_10iYU",
     authDomain: "cat-tower-game.firebaseapp.com",
     databaseURL: "https://cat-tower-game-default-rtdb.firebaseio.com",
@@ -13,5 +13,5 @@ var firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 
-var database = firebase.database();
+let database = firebase.database();
 exports.database = database;
