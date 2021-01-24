@@ -1,17 +1,23 @@
-let firebase = require('firebase/app');
-require("firebase/database");
+let admin = require('firebase-admin');
 
-let firebaseConfig = {
-    apiKey: "AIzaSyBnF9EBYncAtO5QX79SkS6ceYoOR_10iYU",
-    authDomain: "cat-tower-game.firebaseapp.com",
-    databaseURL: "https://cat-tower-game-default-rtdb.firebaseio.com",
-    projectId: "cat-tower-game",
-    storageBucket: "cat-tower-game.appspot.com",
-    messagingSenderId: "776896556502",
-    appId: "1:776896556502:web:dd52d66efefd9a41d04877",
-    measurementId: "G-087BLTHQ22"
-};
-firebase.initializeApp(firebaseConfig);
+// Fetch the service account key JSON file contents
+let serviceAccount = require("./cat-tower-game-firebase-adminsdk-16ddd-0c2c4944b8.json");
 
-let database = firebase.database();
+// Initialize the app with a service account, granting admin privileges
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+  databaseURL: "https://cat-tower-game-default-rtdb.firebaseio.com"
+});
+
+// As an admin, the app has access to read and write all data, regardless of Security Rules
+let database = admin.database();
+let ref = database.ref("Rooms");
+
+// Attach an asynchronous callback to read the data at our posts reference
+// example code
+ref.on("value", function(snapshot) {
+    console.log(snapshot.val());
+  }, function (errorObject) {
+    console.log("The read failed: " + errorObject.code);
+  });
 exports.database = database;
