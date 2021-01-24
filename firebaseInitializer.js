@@ -1,7 +1,7 @@
-var admin = require('firebase-admin');
+let admin = require('firebase-admin');
 
 // Fetch the service account key JSON file contents
-var serviceAccount = require("./cat-tower-game-firebase-adminsdk-16ddd-0c2c4944b8.json");
+let serviceAccount = require("./cat-tower-game-firebase-adminsdk-16ddd-0c2c4944b8.json");
 
 // Initialize the app with a service account, granting admin privileges
 admin.initializeApp({
@@ -10,8 +10,8 @@ admin.initializeApp({
 });
 
 // As an admin, the app has access to read and write all data, regardless of Security Rules
-var database = admin.database();
-var ref = database.ref("Rooms");
+let database = admin.database();
+let ref = database.ref("Rooms");
 
 // Attach an asynchronous callback to read the data at our posts reference
 // example code
