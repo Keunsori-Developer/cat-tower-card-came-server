@@ -1,15 +1,19 @@
+const dotenv = require('dotenv');
+dotenv.config();
+
+
 let firebase = require('firebase/app');
 require("firebase/database");
 
 let firebaseConfig = {
-    apiKey: "AIzaSyBnF9EBYncAtO5QX79SkS6ceYoOR_10iYU",
-    authDomain: "cat-tower-game.firebaseapp.com",
-    databaseURL: "https://cat-tower-game-default-rtdb.firebaseio.com",
-    projectId: "cat-tower-game",
-    storageBucket: "cat-tower-game.appspot.com",
-    messagingSenderId: "776896556502",
-    appId: "1:776896556502:web:dd52d66efefd9a41d04877",
-    measurementId: "G-087BLTHQ22"
+    apiKey: process.env.API_KEY,
+    authDomain: process.env.AUTH_DOMAIN,
+    databaseURL: process.env.DATABASE_URL,
+    projectId: process.env.PROJECT_ID,
+    storageBucket: process.env.STORAGE_BUCKET,
+    messagingSenderId: process.env.MESSAGING_SENDER_ID,
+    appId: process.env.APP_ID,
+    measurementId: process.env.MEASUREMENT_ID,
 };
 firebase.initializeApp(firebaseConfig);
 
