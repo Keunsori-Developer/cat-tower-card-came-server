@@ -24,12 +24,13 @@ module.exports = (req, res) => {
     else {
         var new_roomId = randomKey(5);
 
-        ref.push({
-            roomId: new_roomId,
+        ref.child(new_roomId).set({
             hostId: requestBody.hostId,
             name: requestBody.name,
             capacity: requestBody.capacity,
-            mode: requestBody.mode
+            mode: requestBody.mode,
+            status: "active",
+            joined: 0
         }, function (error) {
             if (error) {
                 res.status(500);
