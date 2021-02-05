@@ -11,12 +11,12 @@ module.exports = (req, res) => {
                 console.log("!!!");
                 console.log(jsonArray);
                 res.status(200);
-                res.json(JSON.stringify(jsonArray));
+                res.send(JSON.stringify(jsonArray));
             },
             function (error) {
                 console.log("The read failed: " + error.code);
                 res.status(500);
-                res.json(null);
+                res.send(null);
             });
 }
 
@@ -35,7 +35,11 @@ function convertToJson(snapshot) {
         json.name = data.val().name;
         json.joined = data.val().joined;
         json.capacity = data.val().capacity;
-        json.hostId = data.val().hostId;
+
+        var hostInfo = new Object();
+        hostInfo.nickname = data.val().nickname;
+        hostInfo.mid = data.val().mid;
+        json.hostInfo = hostInfo;
 
         jsonArray.push(json);
     });

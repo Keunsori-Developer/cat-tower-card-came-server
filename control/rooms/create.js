@@ -7,17 +7,17 @@ module.exports = (req, res) => {
 
     console.log(req.body);
     var requestBody = req.body;
-    console.log(requestBody.hostId);
+    console.log(requestBody.hostInfo);
     console.log(requestBody.name);
     console.log(requestBody.capacity);
     console.log(requestBody.mode);
 
-    if (isEmpty(requestBody.hostId)
+    if (isEmpty(requestBody.hostInfo)
         || isEmpty(requestBody.name)
         || isEmpty(requestBody.capacity)
         || isEmpty(requestBody.mode)) {
         res.status(400);
-        res.json(null);
+        res.send(null);
         console.log("request error");
 
     }
@@ -25,7 +25,7 @@ module.exports = (req, res) => {
         var new_roomId = randomKey(5);
 
         ref.child(new_roomId).set({
-            hostId: requestBody.hostId,
+            hostInfo: requestBody.hostInfo,
             name: requestBody.name,
             capacity: requestBody.capacity,
             mode: requestBody.mode,
@@ -34,12 +34,12 @@ module.exports = (req, res) => {
         }, function (error) {
             if (error) {
                 res.status(500);
-                res.json(null);
+                res.send(null);
             } else {
                 var json = new Object();
                 json.roomId = new_roomId;
                 res.status(200);
-                res.json(JSON.stringify(json));
+                res.send(JSON.stringify(json));
                 console.log(JSON.stringify(json));
             }
         });
