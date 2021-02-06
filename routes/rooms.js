@@ -7,7 +7,6 @@ const userlist = require('../control/rooms/userlist.js');
 const router = express.Router();
 
 router.post('/create', create);
-
 router.post('/userlist',userlist);
 router.get('/active', active);
 router.post('/join', join)
