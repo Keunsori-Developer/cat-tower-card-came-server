@@ -34,9 +34,7 @@ module.exports = (req, res) => {
                 })
 
                 var newUserList = refData.userList;
-                console.log(newUserList.length);
-                console.log(refData.capacity);
-                if (newUserList.length == refData.capacity) {
+                if (newUserList.length == refData.capacity && refData.joined == refData.capacity) {
                     console.log("이미 방이 꽉 참");
                     res.status(202);
                 }
@@ -45,7 +43,8 @@ module.exports = (req, res) => {
                     newUserList.push(requestBody.userInfo);
                     var userListRef = ref.child(requestBody.roomId);
                     userListRef.update({
-                        "userList": newUserList
+                        "userList": newUserList,
+                        "joined" : newUserList.length
                     });
                 }
 
