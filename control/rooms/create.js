@@ -29,6 +29,7 @@ module.exports = (req, res) => {
             name: requestBody.name,
             capacity: requestBody.capacity,
             mode: requestBody.mode,
+            userList: new Array(requestBody.hostInfo),
             status: "active",
             joined: 0
         }, function (error) {
