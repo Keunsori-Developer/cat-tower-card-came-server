@@ -34,14 +34,21 @@ module.exports = (req, res) => {
                 })
 
                 var newUserList = refData.userList;
-                
-                newUserList.push(requestBody.userInfo);
-                var userListRef = ref.child(requestBody.roomId);
-                userListRef.update({
-                    "userList": newUserList
-                });
+                console.log(newUserList.length);
+                console.log(refData.capacity);
+                if (newUserList.length == refData.capacity) {
+                    console.log("이미 방이 꽉 참");
+                    res.status(202);
+                }
+                else {
+                    res.status(200);
+                    newUserList.push(requestBody.userInfo);
+                    var userListRef = ref.child(requestBody.roomId);
+                    userListRef.update({
+                        "userList": newUserList
+                    });
+                }
 
-                res.status(200);
                 console.log("유저 정보 전달(/join)");
                 console.log(newUserList);
                 var userListToJson = new Object();
