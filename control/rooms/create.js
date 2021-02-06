@@ -31,7 +31,7 @@ module.exports = (req, res) => {
             mode: requestBody.mode,
             userList: new Array(requestBody.hostInfo),
             status: "active",
-            joined: 0
+            joined: 1
         }, function (error) {
             if (error) {
                 res.status(500);
