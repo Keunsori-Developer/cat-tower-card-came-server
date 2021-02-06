@@ -1,4 +1,3 @@
-const { json } = require("express");
 const firebase = require("../../firebaseInitializer.js");
 const isEmpty = require('../../utils/checkEmpty.js')
 
@@ -8,7 +7,7 @@ module.exports = (req, res) => {
     var requestBody = req.body;
     console.log(requestBody);
 
-    if (isEmpty(requestBody.roomId) || isEmpty(requestBody.userInfo)) {
+    if (isEmpty(requestBody.roomId)) {
         res.status(400);
         res.send(null);
         return;
@@ -26,32 +25,18 @@ module.exports = (req, res) => {
                     return;
                 }
 
-                var refData = new Object();
-
                 snapshot.forEach(function (data) {
-                    refData = data.val();
+                    var userList = data.val().userList;
+                    res.status(200);
+                    console.log("유저 정보 전달(/userlist)");
+                    var json = new Object();
+                    json.userInfo = userList;
+                    res.send(JSON.stringify(json));
                     return true;
                 })
-
-                var newUserList = refData.userList;
-                
-                newUserList.push(requestBody.userInfo);
-                var userListRef = ref.child(requestBody.roomId);
-                userListRef.update({
-                    "userList": newUserList
-                });
-
-                res.status(200);
-                console.log("유저 정보 전달(/join)");
-                console.log(newUserList);
-                var userListToJson = new Object();
-                userListToJson.userList = newUserList;
-                res.send(JSON.stringify(userListToJson));
-                return true;
-
             },
             function (error) {
                 res.status(500);
-
+                console.log(error);
             });
 }
