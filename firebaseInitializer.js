@@ -1,21 +1,24 @@
-const dotenv = require('dotenv');
-dotenv.config();
+let admin = require('firebase-admin');
 
+// Fetch the service account key JSON file contents
+let serviceAccount = require("./cat-tower-game-firebase-adminsdk-16ddd-0c2c4944b8.json");
 
-let firebase = require('firebase/app');
-require("firebase/database");
+// Initialize the app with a service account, granting admin privileges
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+  databaseURL: "https://cat-tower-game-default-rtdb.firebaseio.com"
+});
 
-let firebaseConfig = {
-    apiKey: process.env.API_KEY,
-    authDomain: process.env.AUTH_DOMAIN,
-    databaseURL: process.env.DATABASE_URL,
-    projectId: process.env.PROJECT_ID,
-    storageBucket: process.env.STORAGE_BUCKET,
-    messagingSenderId: process.env.MESSAGING_SENDER_ID,
-    appId: process.env.APP_ID,
-    measurementId: process.env.MEASUREMENT_ID,
-};
-firebase.initializeApp(firebaseConfig);
+// As an admin, the app has access to read and write all data, regardless of Security Rules
+let database = admin.database();
+let ref = database.ref("Rooms");
 
-let database = firebase.database();
+// Attach an asynchronous callback to read the data at our posts reference
+// example code
+// ref.on("value", function(snapshot) {
+//     console.log(snapshot.val());
+//   }, function (errorObject) {
+//     console.log("The read failed: " + errorObject.code);
+//   });
+  
 exports.database = database;
