@@ -1,4 +1,5 @@
 const firebase = require("../../firebaseInitializer.js");
+const Enum = require("../../utils/enums.js");
 
 module.exports = (req, res) => {
     let ref = firebase.database.ref("Rooms");
@@ -8,10 +9,14 @@ module.exports = (req, res) => {
         .once("value",
             function (snapshot) {
                 var jsonArray = convertToJson(snapshot);
-                console.log("!!!");
-                console.log(jsonArray);
+
+                var roomsToJson = new Object();
+                roomsToJson.code = Enum.GameResponseCode.Success;
+                roomsToJson.rooms = jsonArray;
                 res.status(200);
-                res.send(JSON.stringify(jsonArray));
+                res.send(JSON.stringify(roomsToJson));
+                console.log("/rooms/active success");
+                console.log(JSON.stringify(roomsToJson));
             },
             function (error) {
                 console.log("The read failed: " + error.code);
@@ -27,9 +32,6 @@ function convertToJson(snapshot) {
 
 
     snapshot.forEach(function (data) {
-        console.log(data.key);
-        console.log(data.val());
-
         var json = new Object();
         json.id = data.key;
         json.name = data.val().name;
@@ -37,8 +39,8 @@ function convertToJson(snapshot) {
         json.capacity = data.val().capacity;
 
         var hostInfo = new Object();
-        hostInfo.nickname = data.val().nickname;
-        hostInfo.mid = data.val().mid;
+        hostInfo.nickname = data.val().hostInfo.nickname;
+        hostInfo.mid = data.val().hostInfo.mid;
         json.hostInfo = hostInfo;
 
         jsonArray.push(json);
