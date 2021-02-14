@@ -122,25 +122,30 @@ module.exports = () => {
                                     suffle : suffle,
                                     player : player,
                                 }, (error) => {
-                                    // socket.emit('result', "error" )
-                                    console.log(error);
+                                    if (error) {
+                                        console.log("Data could not be saved." + error);
+                                    } else {
+                                        console.log("Data created successfully.");
+                                    }
                                 });
 
-                                let parsedUser = JSON.parse(user);
-                                console.log(parsedUser);
                                 function findUser(element) {
                                     if(element.userInfo.mid === parsedUser.mid){
                                         return true;
                                     }
                                 }
-                                
-                                console.log(player[player.findIndex(findUser)].order);
-                                let userOrder = player[player.findIndex(findUser)].order;
 
-                                socket.emit("cardgive",suffle.slice( userOrder * capacity, (userOrder+1) * capacity));
-                                socket.emit("playerorder",player);
+                                try{
+                                    var parsedUser = JSON.parse(user);
+                                    console.log(parsedUser);
+                                    console.log(player[player.findIndex(findUser)].order);
+                                    let userOrder = player[player.findIndex(findUser)].order;
 
-                                
+                                    socket.emit("cardgive",suffle.slice( userOrder * capacity, (userOrder+1) * capacity));
+                                    socket.emit("playerorder",player);
+                                }catch (error) {
+                                    console.log("parsing error : "+ error);
+                                }
                             },
                             (error) => {
                                 console.log("The read failed: " + error.code);
@@ -148,18 +153,26 @@ module.exports = () => {
                     } else {
                         let {player, suffle, capacity} = snapshot.val();
 
-                        let parsedUser = JSON.parse(user);
-                        console.log(parsedUser);
                         function findUser(element) {
                             if(element.userInfo.mid === parsedUser.mid){
                                 return true;
                             }
                         }
-                        
-                        console.log(player[player.findIndex(findUser)].order);
-                        let userOrder = player[player.findIndex(findUser)].order;
-                        socket.emit("cardgive",suffle.slice( userOrder * capacity, (userOrder+1) * capacity));
-                        socket.emit("playerorder",player);
+
+                        try{
+                            user=user.replace(/'/g,'"');
+                            console.log(user);
+
+                            var parsedUser = JSON.parse(user);
+                            console.log(parsedUser);
+                            console.log(player[player.findIndex(findUser)].order);
+                            let userOrder = player[player.findIndex(findUser)].order;
+
+                            socket.emit("cardgive",suffle.slice( userOrder * capacity, (userOrder+1) * capacity));
+                            socket.emit("playerorder",player);
+                        }catch (error) {
+                            console.log("parsing error : "+ error);
+                        }
                     }
 
                 },
@@ -177,8 +190,8 @@ module.exports = () => {
             //         function (error) {
             //             console.log("The read failed: " + error.code);
 
-            //         });
-      
+            //         }); RKH6E {"mid" : "GWCSE1622", "nickname" : "김창렬"}
+      //{'mid' : 'GWCSE1622', 'nickname' : '김창렬'}
 
         });
 
@@ -186,45 +199,44 @@ module.exports = () => {
         
         socket.on('throw', (data) => { 
             console.log(data);
-            let {user, card, roomId, round} = data;
+            let {user, card, roomId} = data;
 
             let ref = firebase.database.ref(`Ingame/${roomId}`);
             ref.once("value", (snapshot) => {
-                // console.log(snapshot.val());
-                
+
                 let {order, capacity, board, userList} = snapshot.val();
                 order++;
-                order = order % capacity;  
-                
-                console.log(user, card);
+                // order = order % capacity;  
 
-                let parsedUser = JSON.parse(user);
-                let parsedCard = JSON.parse(card);
-                board[parsedCard.index] = parsedCard.breed;
+                try{
+                    user=user.replace(/'/g,'"');
+                    card=card.replace(/'/g,'"');
+                    console.log(user, card);
 
-                ref.update({
-                    board : board,
-                    order : order
-                }, (error) => {
-                    if (error) {
-                        console.log("Data could not be saved." + error);
-                    } else {
-                        console.log("Data updated successfully.");
-                    }
-                });
+                    var parsedUser = JSON.parse(user);
+                    let parsedCard = JSON.parse(card);
 
-                // // socket.emit('status', `{ user : ${user}, card : ${card} }` );
+                    board[parsedCard.index] = parsedCard.breed;
+
+                    ref.update({
+                        board : board,
+                        order : order
+                    }, (error) => {
+                        if (error) {
+                            console.log("Data could not be saved." + error);
+                        } else {
+                            console.log("Data updated successfully.");
+                            socket.emit('status', { parsedUser , parsedCard , board, order});//나중에 ingame.to(roomId)로 바꿔야함
                 // ingame.to(roomId).emit( 'status', {round : round , user : user , board : board , card : parsedCard, order, userList})
-
+                        }
+                    });                
+                }catch (error) {
+                    console.log("parsing error : "+ error);
+                }
 
             }, (errorObject) => {
             console.log("The read failed: " + errorObject.code);
             });
-        
-
-
-            // ingame.to(roomId).emit('status', `{ user : ${UserInfo}, card : ${CardInfo} }` )
-            // socket.emit('status', `{ user : ${user}, card : ${card} }` );
         });
         
 
@@ -236,32 +248,42 @@ module.exports = () => {
             let {user, roomId} = data;
 
             let ref = firebase.database.ref(`Ingame/${roomId}`);
-            ref.on("value", (snapshot) => {
+            ref.once("value", (snapshot) => {
                 console.log(snapshot.val());
                 
-                let {order, capacity, board, round, player} = snapshot.val();
+                let {order, capacity, board, player} = snapshot.val();
                 order++;
-                order = order % capacity;  
+                // order = order % capacity;  
 
-                console.log(user, roomId);
+                try{
+                    user=user.replace(/'/g,'"');
+                    console.log(user, roomId);
 
+                    var parsedUser = JSON.parse(user);
 
-                // function findUser(element) {
-                //     if(element.userInfo === user){
-                //         return true;
-                //     }
-                // }
-                // player[player.findIndex(findUser)].giveup = true;
+                    function findUser(element) {
+                        if(element.userInfo.mid === parsedUser.mid){
+                            return true;
+                        }
+                    }
 
+                    player[player.findIndex(findUser)].giveup = true;
 
-                // ref.update({
-                //     player,
-                //     order 
-                // });
-
-                // // socket.emit('status', `{ user : ${user}, card : ${card} }` );
-                // ingame.to(roomId).emit( 'status', {round : round , user : user , board : board , card, order, player})
-
+                    ref.update({
+                        player,
+                        order 
+                    }, (error) => {
+                        if (error) {
+                            console.log("Data could not be saved." + error);
+                        } else {
+                            console.log("Data updated successfully.");
+                            socket.emit('status', { parsedUser , player, order});//나중에 ingame.to(roomId)로 바꿔야함
+                // ingame.to(roomId).emit( 'status', {round : round , user : user , board : board , card : parsedCard, order, userList})
+                        }
+                    });                
+                }catch (error) {
+                    console.log("parsing error : "+ error);
+                }
 
               }, (errorObject) => {
                 console.log("The read failed: " + errorObject.code);
@@ -275,27 +297,38 @@ module.exports = () => {
             let {user, round, roomId, leftCard} = data;
 
             let ref = firebase.database.ref(`Ingame/${roomId}`);
-            ref.on("value", (snapshot) => {
-                console.log(snapshot.val());
-                
+            ref.once("value", (snapshot) => {
                 let {round, player} = snapshot.val();
 
 
-                function findUser(element) {
-                    if(element.userInfo === user){
-                        return true;
+
+                try{
+                    user=user.replace(/'/g,'"');
+                    console.log(user, roomId);
+
+                    var parsedUser = JSON.parse(user);
+
+                    function findUser(element) {
+                        if(element.userInfo.mid === parsedUser.mid){
+                            return true;
+                        }
                     }
+                    player[player.findIndex(findUser)].score = leftCard * (-1);
+
+                    ref.update({
+                        player  
+                    }, (error) => {
+                        if (error) {
+                            console.log("Data could not be saved." + error);
+                        } else {
+                            console.log("Data updated successfully.");
+                            socket.emit('result', {player});//나중에 ingame.to(roomId)로 바꿔야함
+                // ingame.to(roomId).emit( 'status', {round : round , user : user , board : board , card : parsedCard, order, userList})
+                        }
+                    });                
+                }catch (error) {
+                    console.log("parsing error : "+ error);
                 }
-                player[player.findIndex(findUser)].score = leftCard * (-1);
-
-                ref.update({
-                    player 
-                });
-
-                // socket.emit('status', `{ user : ${user}, card : ${card} }` );
-                ingame.to(roomId).emit( 'result', {player})
-                // ref.remove();
-
               }, (errorObject) => {
                 console.log("The read failed: " + errorObject.code);
               });

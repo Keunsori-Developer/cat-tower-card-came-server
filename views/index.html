@@ -33,8 +33,8 @@
         <h2>test giveup </h2>
         <div class="form-group">
             <label for="msgForm">user </label>
-            <input type="text" class="form-control" id="roomId" placeholder="roomId">
-            <input type="text" class="form-control" id="user" placeholder="user" value="{ mid: ,nickname: }">
+            <input type="text" class="form-control" id="roomId3" placeholder="roomId">
+            <input type="text" class="form-control" id="user3" placeholder="user" value="{ mid: ,nickname: }">
         </div>
         <button type="submit" class="btn btn-primary">Send</button>
     </form>
@@ -43,9 +43,9 @@
         <h2>test finish </h2>
         <div class="form-group">
             <label for="msgForm">roomId, user, round, leftCard </label>
-            <input type="text" class="form-control" id="roomId" placeholder="roomId">
-            <input type="text" class="form-control" id="user" placeholder="user" value="{ mid: ,nickname: }">
-            <input type="text" class="form-control" id="round" placeholder="round">
+            <input type="text" class="form-control" id="roomId4" placeholder="roomId">
+            <input type="text" class="form-control" id="user4" placeholder="user" value="{ mid: ,nickname: }">
+            <input type="text" class="form-control" id="round4" placeholder="round">
             <input type="text" class="form-control" id="leftCard" placeholder="leftCard ">
         </div>
         <button type="submit" class="btn btn-primary">Send</button>
@@ -122,30 +122,30 @@
 
         $("#form-giveup").submit( (e) => {
             e.preventDefault();
-            let $roomId = $("#roomId");
-            let $user = $("#user");
+            let $roomId3 = $("#roomId3");
+            let $user3 = $("#user3");
 
             socket.emit('giveup', 
                 { 
-                    roomId : $roomId.val(),
-                    user : $user.val()
+                    roomId : $roomId3.val(),
+                    user : $user3.val()
                 }
             );
         });
 
         $("#form-finish").submit( (e) => {
             e.preventDefault();
-            let $roomId = $("#roomId");
-            let $user = $("#user");
-            let $round = $("#round");
+            let $roomId4 = $("#roomId4");
+            let $user4 = $("#user4");
+            let $round4 = $("#round4");
             let $leftCard = $("#leftCard");
 
 
             socket.emit('finish', 
                 { 
-                    roomId : $roomId.val(),
-                    user : $user .val(),
-                    round : $round .val(),
+                    roomId : $roomId4.val(),
+                    user : $user4 .val(),
+                    round : $round4 .val(),
                     leftCard : $leftCard.val(),
                 }
             );
