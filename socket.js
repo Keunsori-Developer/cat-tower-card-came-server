@@ -74,6 +74,8 @@ module.exports = () => {
 
                                 if(snapshot.val()===null){
                                     console.log("error");
+                                    //alert
+                                    //return
                                 }
 
                                 let {capacity, joined, mode, name, userList} = snapshot.val();
@@ -121,6 +123,7 @@ module.exports = () => {
                                     board : newBoard,
                                     suffle : suffle,
                                     player : player,
+                                    finishCount : 0
                                 }, (error) => {
                                     if (error) {
                                         console.log("Data could not be saved." + error);
@@ -136,6 +139,7 @@ module.exports = () => {
                                 }
 
                                 try{
+                                    user=user.replace(/'/g,'"');
                                     var parsedUser = JSON.parse(user);
                                     console.log(parsedUser);
                                     console.log(player[player.findIndex(findUser)].order);
@@ -204,7 +208,7 @@ module.exports = () => {
             let ref = firebase.database.ref(`Ingame/${roomId}`);
             ref.once("value", (snapshot) => {
 
-                let {order, capacity, board, userList} = snapshot.val();
+                let {order, capacity, board, player} = snapshot.val();
                 order++;
                 // order = order % capacity;  
 
@@ -226,8 +230,7 @@ module.exports = () => {
                             console.log("Data could not be saved." + error);
                         } else {
                             console.log("Data updated successfully.");
-                            socket.emit('status', { parsedUser , parsedCard , board, order});//나중에 ingame.to(roomId)로 바꿔야함
-                // ingame.to(roomId).emit( 'status', {round : round , user : user , board : board , card : parsedCard, order, userList})
+                            ingame.to(roomId).emit('status', { user : parsedUser ,player ,board, order});
                         }
                     });                
                 }catch (error) {
@@ -277,8 +280,7 @@ module.exports = () => {
                             console.log("Data could not be saved." + error);
                         } else {
                             console.log("Data updated successfully.");
-                            socket.emit('status', { parsedUser , player, order});//나중에 ingame.to(roomId)로 바꿔야함
-                // ingame.to(roomId).emit( 'status', {round : round , user : user , board : board , card : parsedCard, order, userList})
+                            ingame.to(roomId).emit('status', { user : parsedUser , player, board, order});
                         }
                     });                
                 }catch (error) {
@@ -298,10 +300,8 @@ module.exports = () => {
 
             let ref = firebase.database.ref(`Ingame/${roomId}`);
             ref.once("value", (snapshot) => {
-                let {round, player} = snapshot.val();
-
-
-
+                let {round, player, finishCount, capacity} = snapshot.val();
+                finishCount++;
                 try{
                     user=user.replace(/'/g,'"');
                     console.log(user, roomId);
@@ -313,21 +313,30 @@ module.exports = () => {
                             return true;
                         }
                     }
-                    player[player.findIndex(findUser)].score = leftCard * (-1);
+                    player[player.findIndex(findUser)].score += leftCard * (-1);
 
                     ref.update({
-                        player  
+                        player,
+                        finishCount  
                     }, (error) => {
                         if (error) {
                             console.log("Data could not be saved." + error);
+                            //alert
+                            //return
                         } else {
                             console.log("Data updated successfully.");
-                            socket.emit('result', {player});//나중에 ingame.to(roomId)로 바꿔야함
+
+                            // ingame.to(roomId).emit('result', {player}); 
                 // ingame.to(roomId).emit( 'status', {round : round , user : user , board : board , card : parsedCard, order, userList})
                         }
-                    });                
+                    });
+                    if(capacity <= finishCount){
+                        ingame.to(roomId).emit('result', {player});  
+                        ref.remove();
+                    }
+                    // ingame.to(roomId).emit('result', {player});                
                 }catch (error) {
-                    console.log("parsing error : "+ error);
+                    console.log("error : "+ error);
                 }
               }, (errorObject) => {
                 console.log("The read failed: " + errorObject.code);

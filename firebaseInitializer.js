@@ -14,8 +14,7 @@ let database = admin.database();
 let ref = database.ref("Rooms");
 
 
-Attach an asynchronous callback to read the data at our posts reference
-example code
+
 ref.on("value", function(snapshot) {
     console.log(snapshot.val());
   }, function (errorObject) {
