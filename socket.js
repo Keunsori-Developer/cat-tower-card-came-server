@@ -6,6 +6,7 @@ const nunjucks = require('nunjucks');
 
 const indexRouter = require('./routes');
 const firebase = require('./firebaseInitializer.js');
+const roomsRoutes = require('./routes/rooms');
 
 module.exports = () => {
 
@@ -43,7 +44,9 @@ module.exports = () => {
     const io = SocketIO(server, { path: '/socket.io'});
     app.set('io',io);
     const ingame = io.of('/ingame');
+    const rooms = io.of('/rooms');
 
+    roomsRoutes.WebSocketRooms(rooms);
 
     ingame.on('connection', (socket) => {
         console.log('ingame 네임스페이스에 접속');

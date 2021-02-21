@@ -8,9 +8,33 @@ const exit = require('../control/rooms/exit.js');
 const router = express.Router();
 
 router.post('/create', create);
-router.post('/userlist',userlist);
+//router.post('/userlist',userlist);
 router.get('/active', active);
-router.post('/join', join);
+//router.post('/join', join);
 router.post('/exit', exit);
 
-module.exports = router;
+exports.httpRouter = router;
+
+function WebSocketRooms(rooms) {
+    rooms.on('connection', (socket) => {
+        console.log('rooms namespace connected');
+
+        rooms.on('join', (reqJson) => {
+            console.log(reqJson);
+            var request = JSON.parse(reqJson);
+            var result = join(reqJson);
+            var userInfo = request.userInfo;
+            rooms.join(request.roomId);
+
+            rooms.to(request.roomId).emit('userlist', userlist);
+
+            rooms.on('disconnect', () => {
+                console.log('chat 네임스페이스 접속 해제');
+                rooms.leave(roomId);
+                exit(reqJson);
+            })
+        });
+    })
+}
+
+exports.WebSocketRooms = WebSocketRooms;

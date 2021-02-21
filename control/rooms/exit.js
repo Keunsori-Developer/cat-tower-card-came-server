@@ -2,16 +2,16 @@ const firebase = require("../../firebaseInitializer.js");
 const isEmpty = require('../../utils/checkEmpty.js')
 const Enum = require('../../utils/enums.js');
 
-module.exports = (req, res) => {
+module.exports = (req) => {
     let ref = firebase.database.ref("Rooms");
 
-    var requestBody = req.body;
-    var responseJson = new Object();
+    var requestBody = JSON.parse(req);
+    //var responseJson = new Object();
 
     if (isEmpty(requestBody.roomId) || isEmpty(requestBody.userInfo)) {
-        res.status(200);
-        responseJson.code = Enum.GameResponseCode.WrongRequest;
-        res.send(JSON.stringify(responseJson));
+        // res.status(200);
+        // responseJson.code = Enum.GameResponseCode.WrongRequest;
+        // res.send(JSON.stringify(responseJson));
         return;
     }
 
@@ -19,9 +19,9 @@ module.exports = (req, res) => {
         .equalTo(requestBody.roomId)
         .once("value", function (snapshot) {
             if (snapshot.numChildren() === 0) {
-                responseJson.code = Enum.GameResponseCode.WrongRoomId;
-                res.send(JSON.stringify(responseJson));
-                res.status(200);
+                // responseJson.code = Enum.GameResponseCode.WrongRoomId;
+                // res.send(JSON.stringify(responseJson));
+                // res.status(200);
                 console.log("그런 방은 없습니다");
                 return;
             }
@@ -35,21 +35,21 @@ module.exports = (req, res) => {
 
             if (!ThisUserJoined(refData.userList, requestBody.userInfo)) {
                 console.log("그런 유저는 없습니다");
-                res.status(200);
-                responseJson.code = Enum.GameResponseCode.WrongRequest;
-                res.send(JSON.stringify(responseJson));
+                // res.status(200);
+                // responseJson.code = Enum.GameResponseCode.WrongRequest;
+                // res.send(JSON.stringify(responseJson));
                 return;
             }
 
             RemoveUserDataInRoom(ref.child(requestBody.roomId), refData, requestBody.userInfo);
-            responseJson.code = Enum.GameResponseCode.Success;
-            res.status(200);
-            res.send(JSON.stringify(responseJson));
+            // responseJson.code = Enum.GameResponseCode.Success;
+            // res.status(200);
+            // res.send(JSON.stringify(responseJson));
             console.log("/rooms/exit success");
         }, function (errorObject) {
             console.log("The read failed: " + errorObject.code);
-            res.status(500);
-            res.send(null);
+            // res.status(500);
+            // res.send(null);
         })
 }
 

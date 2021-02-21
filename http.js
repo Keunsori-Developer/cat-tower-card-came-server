@@ -8,7 +8,7 @@ module.exports = () => {
 
     const rooms = require("./routes/rooms.js");
 
-    app.use('/rooms', rooms);
+    app.use('/rooms', rooms.httpRouter);
     app.listen(3000);
 
     console.log("start");
