@@ -2,69 +2,10 @@ const SocketIO = require('socket.io');
 const express = require('express');
 const path = require('path');
 const morgan = require('morgan');
-const cookieParser = require('cookie-parser');
-const session = require('express-session');
 const nunjucks = require('nunjucks');
 
 const indexRouter = require('./routes');
-const firebase_db = require('./firebaseInitializer.js');
-
-
-//리팩토링은 나중에
-
-// function writeUserData(userId, name, email, imageUrl) { //write
-//     firebase.database().ref('users/' + userId).set({
-//       username: name,
-//       email: email,
-//       profile_picture : imageUrl
-//     });
-//   }
-
-
-//   function writeNewPost(uid, username, picture, title, body) {
-//     // A post entry.
-//     var postData = {
-//       author: username,
-//       uid: uid,
-//       body: body,
-//       title: title,
-//       starCount: 0,
-//       authorPic: picture
-//     };
-  
-//     // Get a key for a new Post.
-//     var newPostKey = firebase.database().ref().child('posts').push().key;
-  
-//     // Write the new post's data simultaneously in the posts list and the user's post list.
-//     var updates = {};
-//     updates['/posts/' + newPostKey] = postData;
-//     updates['/user-posts/' + uid + '/' + newPostKey] = postData;
-  
-//     return firebase.database().ref().update(updates);
-//   }
-
-
-//   firebase.database().ref('users/' + userId).set({
-//     username: name,
-//     email: email,
-//     profile_picture : imageUrl
-//   }, (error) => {
-//     if (error) {
-//       // The write failed...
-//     } else {
-//       // Data saved successfully!
-//     }
-//   });
-
-
-
-
-
-
-
-
-
-
+const firebase = require('./firebaseInitializer.js');
 
 module.exports = () => {
 
@@ -77,10 +18,8 @@ module.exports = () => {
     });
     
     app.use(morgan('dev'));
-    app.use(express.static(path.join(__dirname, 'public')));
     app.use(express.json());
-    app.use(express.urlencoded({ extended: false}));
-    
+
     
     app.use('/', indexRouter);
     
@@ -105,98 +44,294 @@ module.exports = () => {
     app.set('io',io);
     const ingame = io.of('/ingame');
 
-    function userInfo( mid, nickname )  {
-        this.mid = mid;
-        this.nickname = nickname;
-    }
-    function roomInfo (id, name, joined, capacity, hostInfo) {
-        this.id = id;
-        this.name = name;
-        this.joined = joined;
-        this.capacity = capacity;
-        this.hostInfo = hostInfo;
-    }
-    function cardInfo( mid, nickname )  {
-        this.mid = mid;
-        this.nickname = nickname;
-    }
-
-    let playerOrder = [];
-    let order = 0;
-    let round = 0;
-    let userCount = 1;
-    let userIngame = 0;
-    let capacity = 2;
 
     ingame.on('connection', (socket) => {
         console.log('ingame 네임스페이스에 접속');
-        userIngame++;
+        
 
         socket.on('disconnect', () => {
             console.log('ingame 네임스페이스 접속 해제');
         });
 
-        /*********skeleton code***********/
 
         socket.on('start', (data) => { 
             console.log(data);
             let {roomId, round, user} = data;
-            //DB
-
-            playerOrder.push( { userInfo : user, order : userCount , socketid: socket.id });
-            console.log(playerOrder);
-
+            let ref = firebase.database.ref(`Ingame`);
+            let refIngame = firebase.database.ref(`Ingame/${roomId}`);
+            let refRooms = firebase.database.ref(`Rooms/${roomId}`);
             socket.join(roomId);
-            // ingame.to(roomId).emit( 'start', `{round : ${round} , user : ${user} }`)
-            // card suffle
-            //서버의 경우 모든 클라에게서 /ingame/start 를 받아야 반대로 /ingame/cardgive 와 /ingame/playerorder 를 전달함
-            socket.emit('cardgive',  `{
-                breedA : 2,
-                breedB : 1,
-                breedC : 0,
-                breedD : 1,
-                breedE : 2,
-                breedS : 0, 
-            }` )
-            if(userIngame === capacity){
-                ingame.to(roomId).emit('playerorder', playerOrder );
-            }          
+            refIngame.once("value",
+                (snapshot) => {
+                    console.log("!!!");
+                    console.log(snapshot.val());
+
+                    if(snapshot.val()===null){
+                        refRooms.once("value",
+                            (snapshot) => {
+                                console.log("!!!");
+                                console.log(snapshot.val());
+
+                                if(snapshot.val()===null){
+                                    console.log("error");
+                                }
+
+                                let {capacity, joined, mode, name, userList} = snapshot.val();
+        
+                                console.log(capacity, joined, mode, name, userList);
+
+                                let suffle = [
+                                    "A","A","A","A","A","A","A",
+                                    "B","B","B","B","B","B","B",
+                                    "C","C","C","C","C","C","C",
+                                    "D","D","D","D","D","D","D",
+                                    "E","E","E","E","E","E","E",
+                                    `S${Math.floor(Math.random() * 3)}`];
+
+                                suffle.sort(()=>{
+                                    return Math.random() - Math.random();
+                                });
+                                console.log(suffle);
+
+                                let player = [];
+                                userList.sort(()=>{
+                                    return Math.random() - Math.random();
+                                });
+
+                                for (let i in userList) {
+                                    player.push(
+                                        {
+                                            userInfo : userList[i],
+                                            order : Number(i),
+                                            score : 0,
+                                            giveup : false
+                                        }
+                                    )
+                                }
+
+                                var newBoard = new Array(57);
+                                newBoard[0] = 0;
+
+                                ref.child(roomId).set({
+                                    name : name,
+                                    round : 1,
+                                    order : 1,
+                                    currentOrder : 1,
+                                    capacity : capacity,
+                                    board : newBoard,
+                                    suffle : suffle,
+                                    player : player,
+                                }, (error) => {
+                                    if (error) {
+                                        console.log("Data could not be saved." + error);
+                                    } else {
+                                        console.log("Data created successfully.");
+                                    }
+                                });
+
+                                function findUser(element) {
+                                    if(element.userInfo.mid === parsedUser.mid){
+                                        return true;
+                                    }
+                                }
+
+                                try{
+                                    var parsedUser = JSON.parse(user);
+                                    console.log(parsedUser);
+                                    console.log(player[player.findIndex(findUser)].order);
+                                    let userOrder = player[player.findIndex(findUser)].order;
+
+                                    socket.emit("cardgive",suffle.slice( userOrder * capacity, (userOrder+1) * capacity));
+                                    socket.emit("playerorder",player);
+                                }catch (error) {
+                                    console.log("parsing error : "+ error);
+                                }
+                            },
+                            (error) => {
+                                console.log("The read failed: " + error.code);
+                            });
+                    } else {
+                        let {player, suffle, capacity} = snapshot.val();
+
+                        function findUser(element) {
+                            if(element.userInfo.mid === parsedUser.mid){
+                                return true;
+                            }
+                        }
+
+                        try{
+                            user=user.replace(/'/g,'"');
+                            console.log(user);
+
+                            var parsedUser = JSON.parse(user);
+                            console.log(parsedUser);
+                            console.log(player[player.findIndex(findUser)].order);
+                            let userOrder = player[player.findIndex(findUser)].order;
+
+                            socket.emit("cardgive",suffle.slice( userOrder * capacity, (userOrder+1) * capacity));
+                            socket.emit("playerorder",player);
+                        }catch (error) {
+                            console.log("parsing error : "+ error);
+                        }
+                    }
+
+                },
+                (error) => {
+                    console.log("The read failed: " + error.code);
+                });
+
+            // ref.orderByChild("status")
+            //     .equalTo("active")
+            //     .once("value",
+            //         function (snapshot) {
+            //             console.log("!!!");
+            //             console.log(snapshot.val());
+            //         },
+            //         function (error) {
+            //             console.log("The read failed: " + error.code);
+
+            //         }); RKH6E {"mid" : "GWCSE1622", "nickname" : "김창렬"}
+      //{'mid' : 'GWCSE1622', 'nickname' : '김창렬'}
 
         });
 
-
-        // 다른 이벤트들도 방정보를 계속 받아야함
 
         
         socket.on('throw', (data) => { 
             console.log(data);
-            let {user, card} = data;
-            //DB
+            let {user, card, roomId} = data;
 
-            // ingame.to(roomId).emit('status', `{ user : ${UserInfo}, card : ${CardInfo} }` )
-            socket.emit('status', `{ user : ${user}, card : ${card} }` );
+            let ref = firebase.database.ref(`Ingame/${roomId}`);
+            ref.once("value", (snapshot) => {
+
+                let {order, capacity, board, userList} = snapshot.val();
+                order++;
+                // order = order % capacity;  
+
+                try{
+                    user=user.replace(/'/g,'"');
+                    card=card.replace(/'/g,'"');
+                    console.log(user, card);
+
+                    var parsedUser = JSON.parse(user);
+                    let parsedCard = JSON.parse(card);
+
+                    board[parsedCard.index] = parsedCard.breed;
+
+                    ref.update({
+                        board : board,
+                        order : order
+                    }, (error) => {
+                        if (error) {
+                            console.log("Data could not be saved." + error);
+                        } else {
+                            console.log("Data updated successfully.");
+                            socket.emit('status', { parsedUser , parsedCard , board, order});//나중에 ingame.to(roomId)로 바꿔야함
+                // ingame.to(roomId).emit( 'status', {round : round , user : user , board : board , card : parsedCard, order, userList})
+                        }
+                    });                
+                }catch (error) {
+                    console.log("parsing error : "+ error);
+                }
+
+            }, (errorObject) => {
+            console.log("The read failed: " + errorObject.code);
+            });
         });
+        
+
+
+
 
         socket.on('giveup', (data) => { 
             console.log(data);
-            let user = data;
+            let {user, roomId} = data;
 
-            //DB
+            let ref = firebase.database.ref(`Ingame/${roomId}`);
+            ref.once("value", (snapshot) => {
+                console.log(snapshot.val());
+                
+                let {order, capacity, board, player} = snapshot.val();
+                order++;
+                // order = order % capacity;  
 
-            // ingame.to(roomId).emit('status', UserInfo );
-            socket.emit('status', user );
+                try{
+                    user=user.replace(/'/g,'"');
+                    console.log(user, roomId);
+
+                    var parsedUser = JSON.parse(user);
+
+                    function findUser(element) {
+                        if(element.userInfo.mid === parsedUser.mid){
+                            return true;
+                        }
+                    }
+
+                    player[player.findIndex(findUser)].giveup = true;
+
+                    ref.update({
+                        player,
+                        order 
+                    }, (error) => {
+                        if (error) {
+                            console.log("Data could not be saved." + error);
+                        } else {
+                            console.log("Data updated successfully.");
+                            socket.emit('status', { parsedUser , player, order});//나중에 ingame.to(roomId)로 바꿔야함
+                // ingame.to(roomId).emit( 'status', {round : round , user : user , board : board , card : parsedCard, order, userList})
+                        }
+                    });                
+                }catch (error) {
+                    console.log("parsing error : "+ error);
+                }
+
+              }, (errorObject) => {
+                console.log("The read failed: " + errorObject.code);
+              });
         });
 
 
-        ingame.interval = setInterval(() => {
-            socket.emit('sequence', "sequence" );
-        },20000);
 
         socket.on('finish', (data) => { 
             console.log(data);
-            //DB
-            // ingame.to(roomId).emit('result', "" )
-            socket.emit('result', "resulut" )
+            let {user, round, roomId, leftCard} = data;
+
+            let ref = firebase.database.ref(`Ingame/${roomId}`);
+            ref.once("value", (snapshot) => {
+                let {round, player} = snapshot.val();
+
+
+
+                try{
+                    user=user.replace(/'/g,'"');
+                    console.log(user, roomId);
+
+                    var parsedUser = JSON.parse(user);
+
+                    function findUser(element) {
+                        if(element.userInfo.mid === parsedUser.mid){
+                            return true;
+                        }
+                    }
+                    player[player.findIndex(findUser)].score = leftCard * (-1);
+
+                    ref.update({
+                        player  
+                    }, (error) => {
+                        if (error) {
+                            console.log("Data could not be saved." + error);
+                        } else {
+                            console.log("Data updated successfully.");
+                            socket.emit('result', {player});//나중에 ingame.to(roomId)로 바꿔야함
+                // ingame.to(roomId).emit( 'status', {round : round , user : user , board : board , card : parsedCard, order, userList})
+                        }
+                    });                
+                }catch (error) {
+                    console.log("parsing error : "+ error);
+                }
+              }, (errorObject) => {
+                console.log("The read failed: " + errorObject.code);
+              });
         });
 
 
