@@ -10,4 +10,6 @@ module.exports = () => {
 
     app.use('/rooms', rooms);
     app.listen(3000);
+
+    console.log("start");
 }
