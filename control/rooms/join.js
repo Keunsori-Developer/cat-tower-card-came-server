@@ -78,7 +78,8 @@ const Enum = require('../../utils/enums.js');
 //             });
 // }
 
-module.exports = (req) => {
+module.exports = (req, rooms) => {
+    console.log("!!");
     console.log(req);
     var request = JSON.parse(req);
 
@@ -137,8 +138,8 @@ module.exports = (req) => {
                 }
 
                 console.log("유저 정보 전달(/join)");
-                console.log(newUserList);
-
+                console.log(JSON.stringify(userListResponseToJson));
+                rooms.to(requestBody.roomId).emit('userlist', JSON.stringify(userListResponseToJson));
                 return JSON.stringify(userListResponseToJson);
             },
             function (error) {

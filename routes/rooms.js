@@ -19,21 +19,23 @@ function WebSocketRooms(rooms) {
     rooms.on('connection', (socket) => {
         console.log('rooms namespace connected');
 
-        rooms.on('join', (reqJson) => {
+        socket.on('join', (reqJson) => {
+            reqJson = reqJson.replace(/'/g, '"');
             console.log(reqJson);
             var request = JSON.parse(reqJson);
-            var result = join(reqJson);
+            var result = join(reqJson, rooms);
+
             var userInfo = request.userInfo;
-            rooms.join(request.roomId);
+            socket.join(request.roomId);
+            // rooms.to(request.roomId).emit('userlist', result);
 
-            rooms.to(request.roomId).emit('userlist', userlist);
-
-            rooms.on('disconnect', () => {
+            socket.on('disconnect', () => {
                 console.log('chat 네임스페이스 접속 해제');
-                rooms.leave(roomId);
+                rooms.leave(request.roomId);
                 exit(reqJson);
             })
         });
+        console.log("우왕");
     })
 }
 

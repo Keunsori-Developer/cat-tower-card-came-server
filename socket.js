@@ -46,7 +46,7 @@ module.exports = () => {
     const ingame = io.of('/ingame');
     const rooms = io.of('/rooms');
 
-    roomsRoutes.WebSocketRooms(rooms);
+    roomsRoutes.WebSocketRooms(rooms, io);
 
     ingame.on('connection', (socket) => {
         console.log('ingame 네임스페이스에 접속');

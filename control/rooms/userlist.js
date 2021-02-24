@@ -74,6 +74,8 @@ module.exports = (roomId) => {
                     json.code = Enum.GameResponseCode.Success;
                     json.userInfo = userList;
                     json.host = data.val().hostInfo;
+                    console.log(JSON.stringify(json));
+                    console.log(typeof JSON.stringify(json))
                     return JSON.stringify(json);
                 })
             },
