@@ -4,7 +4,8 @@ var GameResponseCode = Object.freeze(
         "WrongRequest": 40000,
         "WrongRoomId": 40101,
         "FullRoomCapacity": 40102,
-        "AlreadyJoined": 40103
+        "AlreadyJoined": 40103,
+        "ServerError": 50000
     }
 );
 
@@ -14,6 +15,7 @@ var GameResponseCode = Object.freeze(
 40101 : WrongRoomId 요청보낸 roomId에 해당하는 방 정보가 존재하지 않는 경우
 40102 : FullRoomCapacity /rooms/join 호출했을 때 이미 방이 꽉 찬 경우
 40103 : AlreadyJoined /rooms/join 호출했을 때 유저가 이미 방에 진입한 경우
+50000 : ServerError 서버 내부에서 문제 발생
 */
 
 exports.GameResponseCode = GameResponseCode;

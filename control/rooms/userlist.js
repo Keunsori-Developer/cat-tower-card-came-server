@@ -47,7 +47,7 @@ const Enum = require('../../utils/enums.js');
 //             });
 // }
 
-module.exports = (roomId) => {
+module.exports = (roomId, namespace) => {
     let ref = firebase.database.ref("Rooms");
 
 

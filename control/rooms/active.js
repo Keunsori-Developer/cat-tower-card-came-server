@@ -1,8 +1,11 @@
+const { json } = require("express");
 const firebase = require("../../firebaseInitializer.js");
 const Enum = require("../../utils/enums.js");
 
-module.exports = (req, res) => {
+module.exports = (socket) => {
     let ref = firebase.database.ref("Rooms");
+
+    var roomsToJson = new Object();
 
     ref.orderByChild("status")
         .equalTo("active")
@@ -10,18 +13,17 @@ module.exports = (req, res) => {
             function (snapshot) {
                 var jsonArray = convertToJson(snapshot);
 
-                var roomsToJson = new Object();
                 roomsToJson.code = Enum.GameResponseCode.Success;
                 roomsToJson.rooms = jsonArray;
-                res.status(200);
-                res.send(JSON.stringify(roomsToJson));
+                var successfulResponse = JSON.stringify(roomsToJson);
                 console.log("/rooms/active success");
-                console.log(JSON.stringify(roomsToJson));
+                socket.emit('active', successfulResponse);
             },
             function (error) {
                 console.log("The read failed: " + error.code);
-                res.status(500);
-                res.send(null);
+                roomsToJson.code = Enum.GameResponseCode.ServerError;
+                var response = JSON.stringify(roomsToJson);
+                socket.emit('active', response);
             });
 }
 
@@ -37,6 +39,7 @@ function convertToJson(snapshot) {
         json.name = data.val().name;
         json.joined = data.val().joined;
         json.capacity = data.val().capacity;
+        json.mode = data.val().mode;
 
         var hostInfo = new Object();
         hostInfo.nickname = data.val().hostInfo.nickname;

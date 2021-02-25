@@ -6,15 +6,17 @@ const userlist = require('../control/rooms/userlist.js');
 const exit = require('../control/rooms/exit.js');
 
 
-function WebSocketRooms(rooms) {
+module.exports = (rooms) => {
     rooms.on('connection', (socket) => {
-        console.log('rooms namespace connected');
+        console.log('/rooms namespace connected!!');
 
-        socket.on('join', (reqJson) => {
-            reqJson = reqJson.replace(/'/g, '"');
-            console.log(reqJson);
-            var request = JSON.parse(reqJson);
-            var result = join(reqJson, rooms);
+        socket.on('roomlist', (noData) => active(socket));
+        socket.on('create', (reqData) => create(reqData, socket));
+        socket.on('join', (reqData) => {
+            reqData = reqData.replace(/'/g, '"');
+            console.log(reqData);
+            var request = JSON.parse(reqData);
+            var result = join(reqData, rooms);
 
             var userInfo = request.userInfo;
             socket.join(request.roomId);
@@ -23,11 +25,9 @@ function WebSocketRooms(rooms) {
             socket.on('disconnect', () => {
                 console.log('chat 네임스페이스 접속 해제');
                 rooms.leave(request.roomId);
-                exit(reqJson);
+                exit(reqData);
             })
         });
         console.log("우왕");
     })
 }
-
-exports.WebSocketRooms = WebSocketRooms;
