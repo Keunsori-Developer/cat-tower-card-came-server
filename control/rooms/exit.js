@@ -1,22 +1,23 @@
 const firebase = require("../../firebaseInitializer.js");
 const isEmpty = require('../../utils/checkEmpty.js')
 const Enum = require('../../utils/enums.js');
+const ConvertCsharpJson = require("../../utils/jsonStringConverter.js");
 
-module.exports = (req) => {
+module.exports = (isDisconnected, req, socket, rooms) => {
     let ref = firebase.database.ref("Rooms");
 
-    var requestBody = JSON.parse(req);
-    //var responseJson = new Object();
+    var request = ConvertCsharpJson(req);
+    var responseJson = new Object();
 
-    if (isEmpty(requestBody.roomId) || isEmpty(requestBody.userInfo)) {
-        // res.status(200);
-        // responseJson.code = Enum.GameResponseCode.WrongRequest;
+    if (isEmpty(request.roomId) || isEmpty(request.userInfo)) {
+        responseJson.code = Enum.GameResponseCode.WrongRequest;
+
         // res.send(JSON.stringify(responseJson));
         return;
     }
 
     ref.orderByKey()
-        .equalTo(requestBody.roomId)
+        .equalTo(request.roomId)
         .once("value", function (snapshot) {
             if (snapshot.numChildren() === 0) {
                 // responseJson.code = Enum.GameResponseCode.WrongRoomId;
@@ -33,7 +34,7 @@ module.exports = (req) => {
                 return true;
             });
 
-            if (!ThisUserJoined(refData.userList, requestBody.userInfo)) {
+            if (!ThisUserJoined(refData.userList, request.userInfo)) {
                 console.log("그런 유저는 없습니다");
                 // res.status(200);
                 // responseJson.code = Enum.GameResponseCode.WrongRequest;
@@ -41,7 +42,7 @@ module.exports = (req) => {
                 return;
             }
 
-            RemoveUserDataInRoom(ref.child(requestBody.roomId), refData, requestBody.userInfo);
+            RemoveUserDataInRoom(ref.child(request.roomId), refData, request.userInfo);
             // responseJson.code = Enum.GameResponseCode.Success;
             // res.status(200);
             // res.send(JSON.stringify(responseJson));

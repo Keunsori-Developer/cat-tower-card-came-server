@@ -1,5 +1,6 @@
 function ConvertCsharpJson(data) {
-    return data.replace(/'/g, '"');
+    var str = data.replace(/'/g, '"');
+    return JSON.parse(str);
 }
 
 module.exports = ConvertCsharpJson;
