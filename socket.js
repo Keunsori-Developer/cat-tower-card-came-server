@@ -51,6 +51,7 @@ module.exports = () => {
 
         socket.on('disconnect', () => {
             console.log('ingame 네임스페이스 접속 해제');
+
         });
 
 
@@ -117,7 +118,7 @@ module.exports = () => {
                                 ref.child(roomId).set({
                                     name : name,
                                     round : 1,
-                                    order : 1,
+                                    order : 0,
                                     currentOrder : 1,
                                     capacity : capacity,
                                     board : newBoard,
@@ -143,10 +144,20 @@ module.exports = () => {
                                     var parsedUser = JSON.parse(user);
                                     console.log(parsedUser);
                                     console.log(player[player.findIndex(findUser)].order);
-                                    let userOrder = player[player.findIndex(findUser)].order;
 
-                                    socket.emit("cardgive",suffle.slice( userOrder * capacity, (userOrder+1) * capacity));
-                                    socket.emit("playerorder",player);
+                                    let userOrder = player[player.findIndex(findUser)].order;
+                                    let getCard = parseInt(36/capacity);
+
+                                    if(capacity === 5){
+                                        if(userOrder === 0){
+                                            socket.emit("cardgive", {cards : suffle.slice( userOrder * getCard, (userOrder+1) * getCard + 1)});
+                                        } else {
+                                            socket.emit("cardgive", {cards : suffle.slice( userOrder * getCard + 1, (userOrder+1) * getCard + 1)});
+                                        }
+                                    } else{
+                                        socket.emit("cardgive", {cards : suffle.slice( userOrder * getCard, (userOrder+1) * getCard)});
+                                    }
+                                    socket.emit("playerorder",{player});
                                 }catch (error) {
                                     console.log("parsing error : "+ error);
                                 }
@@ -172,8 +183,8 @@ module.exports = () => {
                             console.log(player[player.findIndex(findUser)].order);
                             let userOrder = player[player.findIndex(findUser)].order;
 
-                            socket.emit("cardgive",suffle.slice( userOrder * capacity, (userOrder+1) * capacity));
-                            socket.emit("playerorder",player);
+                            socket.emit("cardgive", {cards : suffle.slice( userOrder * capacity, (userOrder+1) * capacity)});
+                            socket.emit("playerorder",{player});
                         }catch (error) {
                             console.log("parsing error : "+ error);
                         }
@@ -210,9 +221,15 @@ module.exports = () => {
 
                 let {order, capacity, board, player} = snapshot.val();
                 order++;
-                // order = order % capacity;  
+                order = order % capacity;  
 
                 try{
+                    while(player[order].giveup === true){
+                        order++;
+                        order = order % capacity;
+                    }
+
+
                     user=user.replace(/'/g,'"');
                     card=card.replace(/'/g,'"');
                     console.log(user, card);
@@ -256,9 +273,16 @@ module.exports = () => {
                 
                 let {order, capacity, board, player} = snapshot.val();
                 order++;
-                // order = order % capacity;  
+                order = order % capacity;
 
                 try{
+                    
+                    while(player[order].giveup === true){
+                        order++;
+                        order = order % capacity;
+                    }
+
+
                     user=user.replace(/'/g,'"');
                     console.log(user, roomId);
 
@@ -325,17 +349,13 @@ module.exports = () => {
                             //return
                         } else {
                             console.log("Data updated successfully.");
-
-                            // ingame.to(roomId).emit('result', {player}); 
-                // ingame.to(roomId).emit( 'status', {round : round , user : user , board : board , card : parsedCard, order, userList})
                         }
                     });
                     if(capacity <= finishCount){
                         ingame.to(roomId).emit('result', {player});  
                         ref.remove();
-                    }
-                    // ingame.to(roomId).emit('result', {player});                
-                }catch (error) {
+           
+                } catch (error) {
                     console.log("error : "+ error);
                 }
               }, (errorObject) => {
