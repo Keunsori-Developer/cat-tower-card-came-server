@@ -48,6 +48,7 @@ module.exports = (req, socket) => {
             console.log(successfulResponse);
             // 이 유저가 방에 들어온 유일한 유저이기 때문에, 해당 클라에게만 이벤트를 전달해도 무방함
             socket.emit('userlist', successfulResponse);
+            socket.join(request.roomId);
         }
     });
 }

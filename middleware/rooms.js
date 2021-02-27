@@ -5,7 +5,7 @@ const join = require('../control/rooms/join.js');
 const userlist = require('../control/rooms/userlist.js');
 const exit = require('../control/rooms/exit.js');
 const ConvertCsharpJson = require('../utils/jsonStringConverter.js');
-
+const start = require('../control/rooms/start.js');
 
 module.exports = (rooms) => {
     rooms.on('connection', (socket) => {
@@ -21,16 +21,15 @@ module.exports = (rooms) => {
             lobbyData = ConvertCsharpJson(reqData);
         });
         socket.on('exit', (reqData) => {
-            exit(false, reqData, socket, rooms);
+            exit(false, reqData, lobbyData, socket, rooms);
             lobbyData = null;
         });
+        socket.on('ready', (reqData) => start(reqData, socket, rooms));
         socket.on('disconnect', () => {
             console.log('/rooms namespace disconnected~');
             if (lobbyData == null) return;
-            rooms.leave(lobbyData.roomId);
-            exit(true, lobbyData, socket, rooms);
+            exit(true, null, lobbyData, socket, rooms);
             lobbyData = null;
         })
-        console.log("우왕");
     })
 }

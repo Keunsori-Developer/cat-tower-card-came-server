@@ -3,21 +3,21 @@ const isEmpty = require('../../utils/checkEmpty.js')
 const Enum = require('../../utils/enums.js');
 const ConvertCsharpJson = require("../../utils/jsonStringConverter.js");
 
-module.exports = (isDisconnected, req, socket, rooms) => {
+module.exports = (isDisconnected, req, savedData, socket, rooms) => {
     let ref = firebase.database.ref("Rooms");
-
-    var request = ConvertCsharpJson(req);
-    var responseJson = new Object();
-
-    if (isEmpty(request.roomId) || isEmpty(request.userInfo)) {
-        responseJson.code = Enum.GameResponseCode.WrongRequest;
-
-        // res.send(JSON.stringify(responseJson));
-        return;
+    var reqRoomId, reqUserInfo;
+    if (isDisconnected) {
+        reqRoomId = savedData.roomId;
+        reqUserInfo = savedData.userInfo;
+    }
+    else {
+        var request = ConvertCsharpJson(req);
+        reqRoomId = request.roomId;
+        reqUserInfo = request.userInfo;
     }
 
     ref.orderByKey()
-        .equalTo(request.roomId)
+        .equalTo(reqRoomId)
         .once("value", function (snapshot) {
             if (snapshot.numChildren() === 0) {
                 // responseJson.code = Enum.GameResponseCode.WrongRoomId;
@@ -34,7 +34,7 @@ module.exports = (isDisconnected, req, socket, rooms) => {
                 return true;
             });
 
-            if (!ThisUserJoined(refData.userList, request.userInfo)) {
+            if (!ThisUserJoined(refData.userList, reqUserInfo)) {
                 console.log("그런 유저는 없습니다");
                 // res.status(200);
                 // responseJson.code = Enum.GameResponseCode.WrongRequest;
@@ -42,11 +42,19 @@ module.exports = (isDisconnected, req, socket, rooms) => {
                 return;
             }
 
-            RemoveUserDataInRoom(ref.child(request.roomId), refData, request.userInfo);
-            // responseJson.code = Enum.GameResponseCode.Success;
-            // res.status(200);
-            // res.send(JSON.stringify(responseJson));
+            var responseJson = new Object();
+            var result = RemoveUserDataInRoom(ref.child(reqRoomId), refData, reqUserInfo);
+            responseJson.code = Enum.GameResponseCode.Success;
+            responseJson.roomId = reqRoomId;
+            if (result != null) {
+                responseJson.userList = result.userList;
+                responseJson.host = result.hostInfo;
+            }
             console.log("/rooms/exit success");
+            var successfulResponse = JSON.stringify(responseJson);
+            console.log(successfulResponse);
+            socket.leave(reqRoomId);
+            rooms.to(reqRoomId).emit('userlist', successfulResponse);
         }, function (errorObject) {
             console.log("The read failed: " + errorObject.code);
             // res.status(500);
@@ -68,7 +76,7 @@ function RemoveUserDataInRoom(roomDataRef, refData, requestedUser) {
     if (refData.joined === 1 || oldUserList.length === 1) {
         ref.child(requestBody.roomId).set(null);
         console.log("방이 삭제됩니다");
-        return;
+        return null;
     }
     var newUserList = new Array();
     newUserList = oldUserList.filter(x => x.mid != requestedUser.mid);
@@ -84,4 +92,10 @@ function RemoveUserDataInRoom(roomDataRef, refData, requestedUser) {
         "userList": newUserList,
         "joined": newUserList.length
     });
+
+    var returnValue = new Object();
+    returnValue.hostInfo = hostData;
+    returnValue.userList = newUserList;
+
+    return returnValue;
 }
