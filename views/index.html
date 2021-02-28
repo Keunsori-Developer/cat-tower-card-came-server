@@ -90,11 +90,11 @@
             let $user = $("#user");
 
             socket.emit('start', 
-                { 
-                    roomId : $roomId.val(),
-                    round : $round.val(),
-                    user : $user.val()
-                }
+                `{ 
+                    'roomId' : '${$roomId.val()}',
+                    'round' : ${$round.val()},
+                    'user' : ${$user.val()}
+                }`
             );
             $roomId.val("");
             $round.val("");
