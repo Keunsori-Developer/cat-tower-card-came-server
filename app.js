@@ -1,10 +1,7 @@
 const dotenv = require('dotenv');
 const firebase = require('./firebaseInitializer');
 dotenv.config();
-const ingame = require('./ingame');
-const http = require('./http');
+const webSocket = require('./socket');
 
+webSocket();//webSocket
 
-
-ingame(); //webSocket ingame
-http();

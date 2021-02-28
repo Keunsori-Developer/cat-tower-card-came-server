@@ -13,13 +13,4 @@ admin.initializeApp({
 let database = admin.database();
 let ref = database.ref("Rooms");
 
-
-
-ref.on("value", function(snapshot) {
-    console.log(snapshot.val());
-  }, function (errorObject) {
-    console.log("The read failed: " + errorObject.code);
-  });
-  
-
 exports.database = database;

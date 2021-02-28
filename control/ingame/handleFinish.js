@@ -1,6 +1,6 @@
 const SocketIO = require('socket.io');
 const path = require('path');
-const firebase = require('../firebaseInitializer.js');
+const firebase = require('../../firebaseInitializer.js');
 
 module.exports = (data, ingame) => { 
     console.log(data);
