@@ -57,16 +57,12 @@ module.exports = () => {
 
         socket.on('disconnect', () => {
             console.log('ingame 네임스페이스 접속 해제');
-
+            // 탈주처리
         });
 
-
         socket.on('start', (data) => handleStart(data, socket));
-   
         socket.on('throw', (data) => handleThrow(data, ingame));
-        
         socket.on('giveup', (data) => handleGiveup(data, ingame));
-
         socket.on('finish', (data) => handleFinish(data, ingame));
 
     });
