@@ -35,7 +35,7 @@ module.exports = (data, ingame) => {
                     console.log("Data could not be saved." + error);
                 } else {
                     console.log("Data updated successfully.");
-                    ingame.to(roomId).emit('status', { user : parsedUser ,player ,board, order});
+                    ingame.to(roomId).emit('status', JSON.stringify({ user : parsedUser ,player ,board, order, giveup: false}));
                 }
             });                
         } catch (error) {

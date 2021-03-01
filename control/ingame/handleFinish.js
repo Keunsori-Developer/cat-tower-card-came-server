@@ -11,7 +11,7 @@ module.exports = (data, ingame) => {
 
     let ref = firebase.database.ref(`Ingame/${roomId}`);
     ref.once("value", (snapshot) => {
-        let {round, player, finishCount, capacity} = snapshot.val();
+        let {round, player, finishCount, capacity, mode} = snapshot.val();
         finishCount++;
         try{
             // user=user.replace(/'/g,'"');
@@ -39,8 +39,8 @@ module.exports = (data, ingame) => {
                 }
             });
             if(capacity <= finishCount){
-                ingame.to(roomId).emit('result', {player});  
-                ref.remove();
+                ingame.to(roomId).emit('result', JSON.stringify({player}));  
+                if(mode === round)ref.remove();
             }
         } catch (error) {
             console.log("error : "+ error);

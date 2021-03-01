@@ -38,6 +38,14 @@ module.exports = (data, ingame) => {
 
             player[player.findIndex(findUser)].giveup = true;
 
+            function checkRoundEnd() {
+                for(let i in player){
+                    if(player[i].giveup === false) return false;
+                }
+                return true;
+            }
+
+
             ref.update({
                 player,
                 order 
@@ -46,7 +54,10 @@ module.exports = (data, ingame) => {
                     console.log("Data could not be saved." + error);
                 } else {
                     console.log("Data updated successfully.");
-                    ingame.to(roomId).emit('status', { user : parsedUser , player, board, order});
+                    if(checkRoundEnd()){
+                        ingame.to(roomId).emit('endround', JSON.stringify({ user : parsedUser , player, board, order, giveup : true}));
+                    }
+                    ingame.to(roomId).emit('status', JSON.stringify({ user : parsedUser , player, board, order, giveup : true}));
                 }
             });                
         }catch (error) {
