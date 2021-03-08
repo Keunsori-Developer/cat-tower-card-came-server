@@ -39,7 +39,7 @@ const server = app.listen(app.get('port'), () => {
     console.log(app.get('port'),'번 포트에서 대기중');
 });
 
-const io = SocketIO(server, { path: '/socket.io'});
+const io = SocketIO(server);
 app.set('io',io);
 const ingame = io.of('/ingame');
 const rooms = io.of('/rooms');
