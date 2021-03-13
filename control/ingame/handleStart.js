@@ -119,15 +119,17 @@ module.exports = (data, socket) => {
                     });
                     console.log(suffle);
 
-                    ref.update({
+                    refIngame.update({
                         board : newBoard,
                         order : 0,
-                        round: lastRound,
+                        round: round,
                         finishCount : 0,
                         suffle
                     }, (error) => {
                         if (error) {
                             console.log("Data could not be saved." + error);
+                        } else {
+                            console.log("Data created successfully.");
                         }
                     });  
                 }
