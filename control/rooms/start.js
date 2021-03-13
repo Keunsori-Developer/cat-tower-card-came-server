@@ -29,6 +29,6 @@ module.exports = (req, socket, rooms) => {
                 }
                 var response = new Object();
                 response.roomId = request.roomId;
-                socket.to(request.roomId).emit("start", JSON.parse(response));
+                socket.to(request.roomId).emit("start", JSON.stringify(response));
             });
 }
