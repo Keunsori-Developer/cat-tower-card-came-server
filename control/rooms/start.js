@@ -5,7 +5,7 @@ const jsonConverter = require('../../utils/jsonStringConverter.js');
 
 module.exports = (req, socket, rooms) => {
     var request = jsonConverter(req);
-
+    console.log("게임 시작 요청됨");
     let ref = firebase.database.ref("Rooms");
     ref.orderByKey()
         .equalTo(request.roomId)
@@ -23,7 +23,10 @@ module.exports = (req, socket, rooms) => {
                     return true;
                 });
 
-                if (refData.hostInfo.mid != request.hostInfo.mid) return;
+                if (refData.hostInfo.mid !== request.hostInfo.mid) {
+                    console.log("방장이 아니라 유효한 요청이 아님");
+                    return;
+                }
                 var response = new Object();
                 response.roomId = request.roomId;
                 socket.to(request.roomId).emit("start", JSON.parse(response));
