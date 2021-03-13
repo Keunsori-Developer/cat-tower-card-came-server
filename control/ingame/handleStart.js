@@ -119,11 +119,16 @@ module.exports = (data, socket) => {
                     });
                     console.log(suffle);
 
+                    for(let i in player){
+                        player[i].giveup == false;
+                    }
+
                     refIngame.update({
                         board : newBoard,
                         order : 0,
                         round: round,
                         finishCount : 0,
+                        player,
                         suffle
                     }, (error) => {
                         if (error) {
@@ -154,8 +159,6 @@ module.exports = (data, socket) => {
         });
 
 
-            // RKH6E{"mid" : "GWCSE1622", "nickname" : "김창렬"}
-              //{'mid' : 'GWCSE1622', 'nickname' : '김창렬'}
 
 
 

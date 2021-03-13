@@ -75,7 +75,7 @@
         socket.on('status', function (data) {
             console.log(data);
         });
-        socket.on('sequence', function (data) {
+        socket.on('endround', function (data) {
             console.log(data);
         });
         socket.on('result', function (data) {
@@ -109,11 +109,11 @@
 
 
             socket.emit('throw', 
-                { 
-                    roomId : $roomId2.val(),
-                    user : $user2.val(),
-                    card : $card.val()
-                }
+                `{ 
+                    'roomId' : '${$roomId2.val()}',
+                    'user' : ${$user2.val()},
+                    'card' : ${$card.val()}
+                }`
             );
             $roomId2.val("");
             $user.val("");
@@ -126,10 +126,10 @@
             let $user3 = $("#user3");
 
             socket.emit('giveup', 
-                { 
-                    roomId : $roomId3.val(),
-                    user : $user3.val()
-                }
+                `{ 
+                    'roomId' : '${$roomId3.val()}',
+                    'user' : ${$user3.val()}
+                }`
             );
         });
 
@@ -142,12 +142,12 @@
 
 
             socket.emit('finish', 
-                { 
-                    roomId : $roomId4.val(),
-                    user : $user4 .val(),
-                    round : $round4 .val(),
-                    leftCard : $leftCard.val(),
-                }
+                `{ 
+                    'roomId' : '${$roomId4.val()}',
+                    'user' : ${$user4 .val()},
+                    'round' : ${$round4 .val()},
+                    'leftCard' : ${$leftCard.val()}
+                }`
             );
         });
 

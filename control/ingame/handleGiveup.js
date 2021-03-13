@@ -18,9 +18,10 @@ module.exports = (data, ingame) => {
         order = order % capacity;
 
         try{
-            
-            while(player[order].giveup === true){
+            let count = 0;
+            while(player[order].giveup === true&&count<7){
                 order++;
+                count++;
                 order = order % capacity;
             }
 
@@ -56,8 +57,9 @@ module.exports = (data, ingame) => {
                     console.log("Data updated successfully.");
                     if(checkRoundEnd()){
                         ingame.to(roomId).emit('endround', JSON.stringify({ user : parsedUser , player, board, order, giveup : true}));
+                    } else {
+                        ingame.to(roomId).emit('status', JSON.stringify({ user : parsedUser , player, board, order, giveup : true}));
                     }
-                    ingame.to(roomId).emit('status', JSON.stringify({ user : parsedUser , player, board, order, giveup : true}));
                 }
             });                
         }catch (error) {

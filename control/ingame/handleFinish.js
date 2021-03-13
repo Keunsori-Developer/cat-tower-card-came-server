@@ -40,7 +40,7 @@ module.exports = (data, ingame) => {
             });
             if(capacity <= finishCount){
                 ingame.to(roomId).emit('result', JSON.stringify({player}));  
-                if(mode === round)ref.remove();
+                if((mode*2) === round)ref.remove();
             }
         } catch (error) {
             console.log("error : "+ error);
