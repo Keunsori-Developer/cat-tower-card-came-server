@@ -63,6 +63,7 @@ module.exports = (req, socket, rooms) => {
                         });
                     }
                     userListResponseToJson.userList = newUserList;
+                    userListResponseToJson.host = refData.host;
                 }
                 
                 console.log("유저 정보 전달(/join)");
