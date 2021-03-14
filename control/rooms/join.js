@@ -39,6 +39,8 @@ module.exports = (req, socket, rooms) => {
                 var newUserList = new Array();
                 newUserList = refData.userList;
                 var userListResponseToJson = new Object();
+                userListResponseToJson.roomId = request.roomId;
+                userListResponseToJson.roomName = refData.name;
 
                 if (newUserList.length == refData.capacity && refData.joined == refData.capacity) {
                     console.log("이미 방이 꽉 참");
@@ -69,7 +71,7 @@ module.exports = (req, socket, rooms) => {
                 console.log("유저 정보 전달(/join)");
                 var successfulResponse = JSON.stringify(userListResponseToJson);
                 console.log(successfulResponse);
-                rooms.to(request.roomId).emit('userlist', JSON.stringify(userListResponseToJson));
+                rooms.to(request.roomId).emit('userlist', successfulResponse);
             },
             function (error) {
                 console.log(error);

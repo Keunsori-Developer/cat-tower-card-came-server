@@ -74,7 +74,7 @@ function RemoveUserDataInRoom(roomDataRef, refData, requestedUser) {
 
     var cntUserLength = refData.joined;
     if (refData.joined === 1 || oldUserList.length === 1) {
-        ref.child(requestBody.roomId).set(null);
+        roomDataRef.set(null);
         console.log("방이 삭제됩니다");
         return null;
     }

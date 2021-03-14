@@ -41,6 +41,7 @@ module.exports = (req, socket) => {
             userArray.push(requestData.hostInfo);
             json.code = Enum.GameResponseCode.Success;
             json.roomId = new_roomId;
+            json.roomName = requestData.name;
             json.userList = userArray;
             json.host = requestData.hostInfo;
             var successfulResponse = JSON.stringify(json);

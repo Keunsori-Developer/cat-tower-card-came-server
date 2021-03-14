@@ -72,6 +72,8 @@ module.exports = (roomId, namespace) => {
                     console.log("유저 정보 전달(/userlist)");
                     var json = new Object();
                     json.code = Enum.GameResponseCode.Success;
+                    json.roomId = roomId;
+                    json.roomName = data.val().name;
                     json.userInfo = userList;
                     json.host = data.val().hostInfo;
                     console.log(JSON.stringify(json));
