@@ -24,6 +24,7 @@ module.exports = (data, ingame) => {
                     return true;
                 }
             }
+            
             player[player.findIndex(findUser)].score += leftCard * (-1);
 
             ref.update({
