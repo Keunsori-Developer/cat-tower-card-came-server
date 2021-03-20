@@ -34,6 +34,10 @@ module.exports = (req, socket, rooms) => {
                 response.roomId = request.roomId;
                 rooms.to(request.roomId).emit("start", JSON.stringify(response));
 
+                ref.child(request.roomId).update({
+                        "status": "playing"
+                    });
+
                 //init ingame db
                 let refIngame = firebase.database.ref(`Ingame/${roomId}`);
                 let refRooms = firebase.database.ref(`Rooms/${roomId}`);
