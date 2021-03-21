@@ -16,50 +16,55 @@ module.exports = (isDisconnected, req, savedData, socket, rooms) => {
         reqUserInfo = request.userInfo;
     }
 
-    ref.orderByKey()
-        .equalTo(reqRoomId)
-        .once("value", function (snapshot) {
-            if (snapshot.numChildren() === 0) {
-                // responseJson.code = Enum.GameResponseCode.WrongRoomId;
-                // res.send(JSON.stringify(responseJson));
-                // res.status(200);
-                console.log("그런 방은 없습니다");
-                return;
-            }
+    try {
+        ref.orderByKey()
+            .equalTo(reqRoomId)
+            .once("value", function (snapshot) {
+                if (snapshot.numChildren() === 0) {
+                    // responseJson.code = Enum.GameResponseCode.WrongRoomId;
+                    // res.send(JSON.stringify(responseJson));
+                    // res.status(200);
+                    console.log("그런 방은 없습니다");
+                    return;
+                }
 
-            var refData = new Object();
+                var refData = new Object();
 
-            snapshot.forEach(function (data) {
-                refData = data.val();
-                return true;
-            });
+                snapshot.forEach(function (data) {
+                    refData = data.val();
+                    return true;
+                });
 
-            if (!ThisUserJoined(refData.userList, reqUserInfo)) {
-                console.log("그런 유저는 없습니다");
-                // res.status(200);
-                // responseJson.code = Enum.GameResponseCode.WrongRequest;
-                // res.send(JSON.stringify(responseJson));
-                return;
-            }
+                if (!ThisUserJoined(refData.userList, reqUserInfo)) {
+                    console.log("그런 유저는 없습니다");
+                    // res.status(200);
+                    // responseJson.code = Enum.GameResponseCode.WrongRequest;
+                    // res.send(JSON.stringify(responseJson));
+                    return;
+                }
 
-            var responseJson = new Object();
-            var result = RemoveUserDataInRoom(ref.child(reqRoomId), refData, reqUserInfo);
-            responseJson.code = Enum.GameResponseCode.Success;
-            responseJson.roomId = reqRoomId;
-            if (result != null) {
-                responseJson.userList = result.userList;
-                responseJson.host = result.hostInfo;
-            }
-            console.log("/rooms/exit success");
-            var successfulResponse = JSON.stringify(responseJson);
-            console.log(successfulResponse);
-            socket.leave(reqRoomId);
-            rooms.to(reqRoomId).emit('userlist', successfulResponse);
-        }, function (errorObject) {
-            console.log("The read failed: " + errorObject.code);
-            // res.status(500);
-            // res.send(null);
-        })
+                var responseJson = new Object();
+                var result = RemoveUserDataInRoom(ref.child(reqRoomId), refData, reqUserInfo);
+                responseJson.code = Enum.GameResponseCode.Success;
+                responseJson.roomId = reqRoomId;
+                if (result != null) {
+                    responseJson.userList = result.userList;
+                    responseJson.host = result.hostInfo;
+                }
+                console.log("/rooms/exit success");
+                var successfulResponse = JSON.stringify(responseJson);
+                console.log(successfulResponse);
+                socket.leave(reqRoomId);
+                rooms.to(reqRoomId).emit('userlist', successfulResponse);
+            }, function (errorObject) {
+                console.log("The read failed: " + errorObject.code);
+                // res.status(500);
+                // res.send(null);
+            })
+    }
+    catch (error) {
+        console.log("ㅠㅠㅠ" + error);
+    }
 }
 
 function ThisUserJoined(userList, requestedUser) {

@@ -15,13 +15,11 @@ module.exports = (data, ingame) => {
         let {order, capacity, board, player} = snapshot.val();
         order++;
         order = order % capacity;  
-console.log("handle Throw~~~~~~~~~~");
-console.log(user.nickname);
+
         try{
             while(player[order].giveup === true){
                 order++;
                 order = order % capacity;
-                console.log("??????");
             }
 
             let parsedUser = user;
