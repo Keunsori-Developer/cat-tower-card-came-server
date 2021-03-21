@@ -35,6 +35,10 @@ module.exports = (req, socket, rooms) => {
                 response.roomId = request.roomId;
                 rooms.to(request.roomId).emit("start", JSON.stringify(response));
 
+                ref.child(request.roomId).update({
+                        "status": "playing"
+                    });
+
                 //init ingame db
                 initIngame(request.roomId);
             });
