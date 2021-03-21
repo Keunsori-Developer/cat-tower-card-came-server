@@ -7,7 +7,7 @@ module.exports = (data, ingame) => {
     data=data.replace(/'/g,'"');
     data = JSON.parse(data);
 
-    let {userInfo, roomId} = data;
+    let {user, roomId} = data;
 
     let ref = firebase.database.ref(`Ingame/${roomId}`);
     ref.once("value", (snapshot) => {
@@ -29,7 +29,7 @@ module.exports = (data, ingame) => {
             // user=user.replace(/'/g,'"');
             // console.log(user, roomId);
 
-            var parsedUser = userInfo;
+            var parsedUser = user;
 
             function findUser(element) {
                 if(element.userInfo.mid === parsedUser.mid){

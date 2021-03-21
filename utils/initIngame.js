@@ -57,7 +57,7 @@ module.exports = (roomId) => {
             name : name,
             round : 0,
             order : 0,
-            capacity : capacity,
+            capacity : joined,
             board : newBoard,
             suffle : suffle,
             player : player,
