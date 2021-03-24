@@ -1,6 +1,7 @@
 const SocketIO = require('socket.io');
 const path = require('path');
 const firebase = require('../../firebaseInitializer.js');
+const rebootIngame = require('../../utils/rebootIngame.js');
 
 module.exports = (data, ingame) => { 
     console.log(data);
@@ -57,6 +58,7 @@ module.exports = (data, ingame) => {
                     console.log("Data updated successfully.");
                     if(checkRoundEnd()){
                         ingame.to(roomId).emit('endround', JSON.stringify({ user : parsedUser , player, board, order, giveup : true}));
+                        rebootIngame(roomId);                        
                     } else {
                         ingame.to(roomId).emit('status', JSON.stringify({ user : parsedUser , player, board, order, giveup : true}));
                     }
