@@ -15,7 +15,7 @@ module.exports = (roomId) => {
             return
         }
 
-        let {finishCount , player, round, order} = snapshot.val();
+        let {player, round} = snapshot.val();
 
 
         let suffle = [
@@ -57,7 +57,7 @@ module.exports = (roomId) => {
             if (error) {
                 console.log("Data could not be saved." + error);
             } else {
-                console.log("Data created successfully.");
+                console.log("Data updated successfully.");
             }
         });
     },

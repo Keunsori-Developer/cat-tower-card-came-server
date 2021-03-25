@@ -5,16 +5,16 @@ const rebootIngame = require('../../utils/rebootIngame.js');
 
 module.exports = (data, ingame) => { 
     console.log(data);
-    data=data.replace(/'/g,'"');
+    data = data.replace(/'/g,'"');
     data = JSON.parse(data);
 
-    let {user, roomId} = data;
+    let {user, roomId, leftCard} = data;
 
     let ref = firebase.database.ref(`Ingame/${roomId}`);
     ref.once("value", (snapshot) => {
         console.log(snapshot.val());
         
-        let {order, capacity, board, player} = snapshot.val();
+        let {order, capacity, board, player, mode, round} = snapshot.val();
         order++;
         order = order % capacity;
 
@@ -47,6 +47,7 @@ module.exports = (data, ingame) => {
                 return true;
             }
 
+            player[player.findIndex(findUser)].score += leftCard * (-1);
 
             ref.update({
                 player,
@@ -57,9 +58,17 @@ module.exports = (data, ingame) => {
                 } else {
                     console.log("Data updated successfully.");
                     if(checkRoundEnd()){
-                        ingame.to(roomId).emit('endround', JSON.stringify({ user : parsedUser , player, board, order, giveup : true}));
-                        rebootIngame(roomId);                        
+                        if(mode * 2 === round){
+                            ingame.to(roomId).emit('result', JSON.stringify({player}));  
+                            console.log("result");
+                            ref.remove();
+                        } else {
+                            ingame.to(roomId).emit('endround', JSON.stringify({ user : parsedUser , player, board, order, giveup : true}));
+                            console.log("endround");
+                            rebootIngame(roomId);        
+                        }               
                     } else {
+                        console.log("status");
                         ingame.to(roomId).emit('status', JSON.stringify({ user : parsedUser , player, board, order, giveup : true}));
                     }
                 }
