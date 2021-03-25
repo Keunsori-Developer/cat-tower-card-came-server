@@ -9,7 +9,7 @@ module.exports = (data, socket) => {
     data=data.replace(/'/g,'"');
     data = JSON.parse(data);
 
-    let {roomId, round, user} = data;
+    let {roomId, user} = data;
     // let ref = firebase.database.ref(`Ingame`);
     let refIngame = firebase.database.ref(`Ingame/${roomId}`);
     // let refRooms = firebase.database.ref(`Rooms/${roomId}`);
