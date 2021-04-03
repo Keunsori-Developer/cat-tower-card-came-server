@@ -22,14 +22,24 @@ module.exports = (data, ingame) => {
                 order = order % capacity;
             }
 
+
+
             let parsedUser = user;
             let parsedCard = card;
-
+            function findUser(element) {
+                if(element.userInfo.mid === parsedUser.mid){
+                    return true;
+                }
+            }
+            if(parsedCard.breed=="S0"){
+                player[player.findIndex(findUser)].score += (5);
+            }
             board[parsedCard.index] = parsedCard.breed;
 
             ref.update({
                 board : board,
-                order : order
+                order : order,
+                player
             }, (error) => {
                 if (error) {
                     console.log("Data could not be saved." + error);
